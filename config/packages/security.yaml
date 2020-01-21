@@ -1,0 +1,42 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        my_ldap:
+            ldap:
+                service: Symfony\Component\Ldap\Ldap
+                base_dn: 'dc=example,dc=com'
+                search_dn: 'cn=read-only-admin,dc=example,dc=com'
+                search_password: 'password'
+                default_roles: ROLE_USER
+                uid_key: uid
+                #extra_fields: ['email']
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            anonymous: lazy
+            form_login_ldap:
+                #http_basic_ldap:
+                login_path: login
+                check_path: login
+                service: Symfony\Component\Ldap\Ldap
+                dn_string: 'uid={username},dc=example,dc=com'
+
+            logout:
+                path:   app_logout
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        #- { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/user_agent, roles: ROLE_USER }
+        - { path: ^/test, roles: ROLE_USER }
